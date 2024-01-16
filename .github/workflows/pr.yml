@@ -7,7 +7,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Get latest code
         uses: actions/checkout@v4
@@ -21,5 +20,7 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_REGISTRY }}/personal-blog:${{ github.sha }}
-          cache-from: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache,mode=max
+          # Diabled due to cloudflares upload limit.
+          # Seems like the buildcache is generating at least one large layer.
+          # cache-from: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache
+          # cache-to: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache,mode=max
