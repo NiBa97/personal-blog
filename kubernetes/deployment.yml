@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: personal-blog-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: personal-blog
+  template:
+    metadata:
+      labels:
+        app: personal-blog
+    spec:
+      containers:
+        - name: webapp
+          image: IMAGE_PLACEHOLDER:TAG_PLACEHOLDER
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: regcred
