@@ -1,0 +1,61 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest code
+        uses: actions/checkout@v4
+      - name: Login to registry
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin ${{ secrets.DOCKER_REGISTRY }}
+      - name: "Setup Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_REGISTRY }}/personal-blog:${{ github.sha }}
+          # Diabled due to cloudflares upload limit.
+          # Seems like the buildcache is generating at least one large layer.
+          # cache-from: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache
+          # cache-to: type=registry,ref=${{ secrets.DOCKER_REGISTRY }}/personal-blog:buildcache,mode=max
+
+  release-on-kubernetes:
+    runs-on: ubuntu-latest
+    # needs: build-and-push-container
+    steps:
+      - name: Get latest code
+        uses: actions/checkout@v4
+      - name: Install cloudflared
+        run: |
+          sudo mkdir -p --mode=0755 /usr/share/keyrings
+          curl -fsSL https://pkg.cloudflare.com/cloudflare-main.gpg | sudo tee /usr/share/keyrings/cloudflare-main.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/cloudflare-main.gpg] https://pkg.cloudflare.com/cloudflared $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/cloudflared.list
+          sudo apt-get update && sudo apt-get install cloudflared
+      - name: Install kubectl
+        run: |
+          sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg2 curl
+          curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+          echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+          sudo apt-get update
+          sudo apt-get install -y kubectl
+      - name: Place kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+      - name: Patch deployment
+        run: |
+          yq e '.spec.template.spec.containers[0].image = "${{ secrets.DOCKER_REGISTRY }}/personal-blog:${{ github.sha }}"' -i kubernetes/deployment.yml
+      - name: Access TCP
+        run: |
+          nohup cloudflared access tcp --hostname "${{ secrets.KUBE_API }}" --url 127.0.0.1:1234 &
+          env HTTPS_PROXY=socks5://127.0.0.1:1234 kubectl apply -f kubernetes/deployment.yml --insecure-skip-tls-verify
+          env HTTPS_PROXY=socks5://127.0.0.1:1234 kubectl apply -f kubernetes/service.yml --insecure-skip-tls-verify
+          env HTTPS_PROXY=socks5://127.0.0.1:1234 kubectl apply -f kubernetes/ingress.yml --insecure-skip-tls-verify
