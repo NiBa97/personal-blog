@@ -22,6 +22,21 @@
   @apply my-5;
 }
 
+@layer base {
+  h1 {
+    @apply text-3xl;
+    @apply font-bold;
+  }
+  h2 {
+    @apply text-2xl;
+    @apply font-bold;
+  } 
+  h3 {
+    @apply text-xl;
+    @apply font-bold;
+  }
+}
+
 /* https://stackoverflow.com/questions/61083813/how-to-avoid-internal-autofill-selected-style-to-be-applied */
 input:-webkit-autofill,
 input:-webkit-autofill:focus {
@@ -32,4 +47,10 @@ input:-webkit-autofill:focus {
 
 .katex-display {
   overflow: auto hidden;
+}
+
+.external-link svg{
+  margin-top: 3px;
+  margin-left: 1px;
+  margin-right: 2px;
 }
