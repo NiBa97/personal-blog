@@ -1,51 +1,51 @@
-import NodeCache from 'node-cache'
-import GitHub from 'github-api'
-import GithubRepositories from '@/components/GithubRepository'
-import siteMetadata from '@/data/siteMetadata'
-import SocialIcon from '@/components/social-icons'
-import { FaDumbbell, FaGuitar, FaLaptopCode } from 'react-icons/fa'
-import { PiPersonSimpleBikeBold } from 'react-icons/pi'
-import { sortPosts, allCoreContent } from 'pliny/utils/contentlayer'
-import { BiBrain, BiGitBranch, BiCode } from 'react-icons/bi'
+import NodeCache from "node-cache";
+import GitHub from "github-api";
+import GithubRepositories from "@/components/GithubRepository";
+import siteMetadata from "@/data/siteMetadata";
+import SocialIcon from "@/components/social-icons";
+import { FaDumbbell, FaGuitar, FaLaptopCode } from "react-icons/fa";
+import { PiPersonSimpleBikeBold } from "react-icons/pi";
+import { sortPosts, allCoreContent } from "pliny/utils/contentlayer";
+import { BiBrain, BiGitBranch, BiCode } from "react-icons/bi";
 
-import Tag from '@/components/Tag'
-import { formatDate } from 'pliny/utils/formatDate'
-import { allBlogs } from 'contentlayer/generated'
+import Tag from "@/components/Tag";
+import { formatDate } from "pliny/utils/formatDate";
+import { allBlogs } from "contentlayer/generated";
 
-import Link from 'components/Link'
-const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 })
+import Link from "components/Link";
+const myCache = new NodeCache({ stdTTL: 24 * 60 * 60, checkperiod: 120 });
 
-const MAX_DISPLAY = 3
+const MAX_DISPLAY = 3;
 
 // Define a type for repoData
 export type RepoData = {
-  title: string
-  stargazersCount: number
-  totalContributions: number
-  description: string
-  url: string
-}
+  title: string;
+  stargazersCount: number;
+  totalContributions: number;
+  description: string;
+  url: string;
+};
 
 async function getGithubData() {
-  const repositories = ['vps-benchmarks', 'firefox-css-custom', 'personal-blog']
-  const owner = 'NiBa97'
+  const repositories = ["vps-benchmarks", "firefox-css-custom", "personal-blog"];
+  const owner = "NiBa97";
   const gh = new GitHub({
     username: process.env.GITHUB_USERNAME,
     token: process.env.GITHUB_TOKEN,
-  })
-  const data: Record<string, RepoData> = {}
+  });
+  const data: Record<string, RepoData> = {};
 
   for (const repository of repositories) {
-    let repoData: RepoData | undefined = myCache.get(`${owner}/${repository}`)
+    let repoData: RepoData | undefined = myCache.get(`${owner}/${repository}`);
 
     if (!repoData) {
-      const repo = gh.getRepo(owner, repository)
-      const [details, contributors] = await Promise.all([repo.getDetails(), repo.getContributors()])
+      const repo = gh.getRepo(owner, repository);
+      const [details, contributors] = await Promise.all([repo.getDetails(), repo.getContributors()]);
 
-      let contributions = 0
+      let contributions = 0;
       contributors.data.forEach((contributor) => {
-        contributions += contributor.contributions
-      })
+        contributions += contributor.contributions;
+      });
 
       repoData = {
         title: repository,
@@ -53,23 +53,23 @@ async function getGithubData() {
         totalContributions: contributions,
         description: details.data.description,
         url: details.data.html_url,
-      }
+      };
       // Save data to cache
-      myCache.set(`${owner}/${repository}`, repoData)
+      myCache.set(`${owner}/${repository}`, repoData);
     }
 
-    data[repository] = repoData
+    data[repository] = repoData;
   }
 
-  return { data }
+  return { data };
 }
 
 export default async function Home() {
-  const sortedPosts = sortPosts(allBlogs)
-  const posts = allCoreContent(sortedPosts)
-  const data = await getGithubData()
+  const sortedPosts = sortPosts(allBlogs);
+  const posts = allCoreContent(sortedPosts);
+  const data = await getGithubData();
   return (
-    <div className="mx-auto  py-12">
+    <div className="mx-auto  py-12 max-w-5xl px-4">
       {/* Hero Section */}
       <div className="relative mb-16">
         <div className="flex flex-col-reverse md:flex-row md:items-center md:gap-12">
@@ -78,13 +78,12 @@ export default async function Home() {
               Hi! I'm Niklas Bauer
             </h1>
             <p className="mb-4 text-lg leading-relaxed text-gray-800 dark:text-gray-200">
-              MLOps Engineer at DHL IT Services, where I focus on building scalable machine learning
-              solutions. During my master's, I explored interpretable AI for anomaly detection in
-              multivariate time-series data.
+              MLOps Engineer at DHL IT Services, where I focus on building scalable machine learning solutions. During
+              my master's, I explored interpretable AI for anomaly detection in multivariate time-series data.
             </p>
             <p className="mb-6 text-lg leading-relaxed text-gray-600 dark:text-gray-400">
-              On this blog, I share insights about my homelab setup, review tech gear I use daily,
-              and occasionally dive into ML engineering and web development topics.
+              On this blog, I share insights about my homelab setup, review tech gear I use daily, and occasionally dive
+              into ML engineering and web development topics.
             </p>
             <div className="flex gap-4">
               <Link
@@ -119,18 +118,15 @@ export default async function Home() {
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Latest Posts</h2>
           {posts.length > MAX_DISPLAY && (
-            <Link
-              href="/blog"
-              className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400"
-            >
+            <Link href="/blog" className="text-primary-500 hover:text-primary-600 dark:hover:text-primary-400">
               All Posts &rarr;
             </Link>
           )}
         </div>
         <div className="divide-y divide-gray-200 dark:divide-gray-700">
-          {!posts.length && 'No posts found.'}
+          {!posts.length && "No posts found."}
           {posts.slice(0, MAX_DISPLAY).map((post) => {
-            const { slug, date, title, summary, tags } = post
+            const { slug, date, title, summary, tags } = post;
             return (
               <article key={slug} className="py-6">
                 <div className="space-y-2 xl:grid xl:grid-cols-4 xl:items-baseline xl:space-y-0">
@@ -151,21 +147,17 @@ export default async function Home() {
                         <Tag key={tag} text={tag} />
                       ))}
                     </div>
-                    <div className="prose max-w-none text-gray-500 dark:text-gray-400">
-                      {summary}
-                    </div>
+                    <div className="prose max-w-none text-gray-500 dark:text-gray-400">{summary}</div>
                   </div>
                 </div>
               </article>
-            )
+            );
           })}
         </div>
       </div>
       {/* Tech & Projects Section */}
       <div className="mb-16">
-        <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">
-          Professional Focus
-        </h2>
+        <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">Professional Focus</h2>
         <div className="rounded-2xl bg-gray-50 p-6 shadow-sm dark:bg-gray-800/50">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className="rounded-xl bg-white p-4 shadow-sm dark:bg-gray-800">
@@ -195,9 +187,7 @@ export default async function Home() {
 
       {/* Personal Section */}
       <div>
-        <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">
-          When I'm Not Coding
-        </h2>
+        <h2 className="mb-6 text-2xl font-bold text-gray-900 dark:text-gray-100">When I'm Not Coding</h2>
         <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
           <div className="group flex items-center rounded-xl bg-gray-50 p-6 transition-colors hover:bg-primary-50 dark:bg-gray-800/50 dark:hover:bg-gray-800">
             <FaGuitar className="mr-3 h-6 w-6 text-primary-500 transition-transform group-hover:scale-110" />
@@ -218,5 +208,5 @@ export default async function Home() {
         </div>
       </div>
     </div>
-  )
+  );
 }
