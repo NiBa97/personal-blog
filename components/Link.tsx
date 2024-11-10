@@ -14,8 +14,6 @@ const CustomLink = ({ href, ...rest }: LinkProps & AnchorHTMLAttributes<HTMLAnch
   if (isAnchorLink) {
     return <a href={href} {...rest} />
   }
-  console.log('test')
-  console.log(href, rest)
   if (rest.type && rest.type === 'external') {
     return (
       <a
