@@ -1,16 +1,16 @@
-import siteMetadata from '@/data/siteMetadata'
-import headerNavLinks from '@/data/headerNavLinks'
-import Logo from '@/data/logo.svg'
-import Link from './Link'
-import MobileNav from './MobileNav'
-import ThemeSwitch from './ThemeSwitch'
-import SearchButton from './SearchButton'
+import siteMetadata from "@/data/siteMetadata";
+import headerNavLinks from "@/data/headerNavLinks";
+import Logo from "@/data/logo.svg";
+import Link from "./Link";
+import MobileNav from "./MobileNav";
+import ThemeSwitch from "./ThemeSwitch";
+import SearchButton from "./SearchButton";
 
 const Header = () => {
   return (
-    <header className="mb-4 flex items-center justify-center py-4">
-      <div className="flex w-full justify-between space-x-4 leading-5 sm:space-x-6">
-        <div className="flex items-center space-x-4 font-bold sm:space-x-6">
+    <header className="mb-4 flex items-center justify-around py-4">
+      <div className="flex justify-around  sm:space-x-6">
+        <div className="flex items-centerfont-bold sm:space-x-6 mr-8">
           {headerNavLinks.map((link) => (
             <Link
               key={link.title}
@@ -28,7 +28,7 @@ const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
