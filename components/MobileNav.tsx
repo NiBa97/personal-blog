@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Link from './Link'
-import headerNavLinks from '@/data/headerNavLinks'
+import { useState } from "react";
+import Link from "./Link";
+import headerNavLinks from "@/data/headerNavLinks";
 
 const MobileNav = () => {
-  const [navShow, setNavShow] = useState(false)
+  const [navShow, setNavShow] = useState(false);
 
   const onToggleNav = () => {
     setNavShow((status) => {
       if (status) {
-        document.body.style.overflow = 'auto'
+        document.body.style.overflow = "auto";
       } else {
         // Prevent scrolling
-        document.body.style.overflow = 'hidden'
+        document.body.style.overflow = "hidden";
       }
-      return !status
-    })
-  }
+      return !status;
+    });
+  };
 
   return (
-    <>
+    <div className="">
       <button aria-label="Toggle Menu" onClick={onToggleNav} className="sm:hidden">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -36,8 +36,8 @@ const MobileNav = () => {
         </svg>
       </button>
       <div
-        className={`fixed left-0 top-0 z-10 h-full w-full transform bg-white opacity-95 duration-300 ease-in-out dark:bg-gray-950 dark:opacity-[0.98] ${
-          navShow ? 'translate-x-0' : 'translate-x-full'
+        className={`z-50 fixed left-0 top-0 h-full w-full transform bg-white opacity-95 duration-300 ease-in-out dark:bg-gray-950 ${
+          navShow ? "translate-x-0 h-screen" : "translate-x-full"
         }`}
       >
         <div className="flex justify-end">
@@ -56,7 +56,7 @@ const MobileNav = () => {
             </svg>
           </button>
         </div>
-        <nav className="fixed mt-8 h-full">
+        <nav className={`fixed mt-8 h-full block`}>
           {headerNavLinks.map((link) => (
             <div key={link.title} className="px-12 py-4">
               <Link
@@ -70,8 +70,8 @@ const MobileNav = () => {
           ))}
         </nav>
       </div>
-    </>
-  )
-}
+    </div>
+  );
+};
 
-export default MobileNav
+export default MobileNav;

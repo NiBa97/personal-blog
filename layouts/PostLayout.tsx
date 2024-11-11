@@ -41,8 +41,11 @@ export default function PostLayout({ content, authorDetails, next, prev, childre
   return (
     <div className="min-h-screen">
       {/* Reading Progress Bar */}
-      <div className="fixed top-14 left-0 w-full h-0.5 z-50 bg-gray-200 dark:bg-gray-800">
-        <div className="h-full bg-primary-500 transition-all duration-200" style={{ width: `${readingProgress}%` }} />
+      <div className="fixed z-10 top-15 left-0 w-full h-1 bg-gray-200 dark:bg-gray-800">
+        <div
+          className="h-full bg-primary-500 transition-all duration-200 z-10 relative"
+          style={{ width: `${readingProgress}%` }}
+        />
       </div>
 
       <article className="max-w-6xl mx-auto px-4 pt-8 pb-16">
