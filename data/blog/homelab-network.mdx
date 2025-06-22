@@ -11,21 +11,62 @@ With my growing interest in homelabbing and webdevelopment, I needed a flexible 
 These services also have different needs, my docker registry or s3 storage backend for example needs to have plenty space available. 
 Other services such as web-apps need fast loading times. 
 And lastly, services like paperless or nextcloud need to be accesible from everywhere, but only for me. 
+
 Does this sound like a problem you have as well? 
 Then you found the right blog post! 
 This is my take on solving all of these problems for me.
 
+# Architecture Overview
 
-# My solution
+Before diving into the technical details, let's look at the high-level architecture of my setup. The diagram below shows how different components interact with each other and how both public and private access is managed.
 
+```mermaid
+---
+config:
+  theme: 'dark'
+---
+graph LR
+    %% Define nodes with clear spacing
+    subgraph Internet ["🌐 <b>Internet</b>"]
+        Public["👥 Public Users"]
+        Me["👤 Personal Access"]
+        
+        subgraph Cloud ["☁️ <b>Cloud VPS</b>"]
+            Coolify["🚀 Coolify<br/><small>niklas-bauer.dev</small>"]
+        end
+    end
+    
+    subgraph Homelab ["🏠 <b>Homelab</b>"]
+        NPM["🔄 Nginx Proxy Manager<br/><small>niba.dev</small>"]
+        Services["🎯 Self-hosted Services"]
+    end
+    
+    %% Connections with better labels and no backgrounds
+    linkStyle default stroke:#666,stroke-width:2px
+    Public --> Coolify
+    Me -.- NPM
+    NPM --> Services
+    Coolify -.- Services
+    
+    %% Add labels separately without backgrounds
+    Public ---|"Public Domain"| Coolify
+    Me -.->|"Local Domain<br/>(Tailscale)"| NPM
+    NPM ---|"Reverse Proxy"| Services
+    Coolify -.->|"Tailscale VPN"| Services
+    
+  
+    class Internet internet
+    class Cloud cloud
+    class Homelab homelab
+```
+
+## How It Works
 
 In order to connect my small cloud server (CAX11 from hetzner) with my homelab, I set up a VPN with tailscale. 
 On top of that, I have two domains: the one that you are currently browsing, niklas-bauer.dev, for public exposure as well as niba.dev for local services. 
 Accordingly, the public domain points to the cloud server, and my private domain points to the local IP of my nginx proxy manager instance. 
 
-The last curcial step to get this working is the exit-node in my proxmox cluster.
-
-
+The last crucial step to get this working is the exit-node in my proxmox cluster.
 
 # Configurations
 
