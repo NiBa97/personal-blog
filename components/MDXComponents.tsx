@@ -13,7 +13,7 @@ export const components: MDXComponents = {
   Image,
   TOCInline,
   a: CustomLink,
-  pre: (props) => <PreviewableCode defaultView={'code'} renderers={renderers} {...props} />,
+  pre: (props) => <PreviewableCode defaultView={'code'} renderers={renderers} children={props.children} {...props} />,
   table: TableWrapper,
   AudioComponent: AudioComponent,
   BlogNewsletterForm,
