@@ -3,6 +3,10 @@ name: PR Build Check
 on:
   pull_request:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   build-container:
     runs-on: ubuntu-latest
@@ -17,3 +21,78 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
+          load: true
+          tags: personal-blog:pr-${{ github.event.pull_request.number }}
+      
+      - name: Install Playwright
+        run: npx playwright install chromium
+      
+      - name: Start container and take screenshots
+        run: |
+          # Start the container in the background
+          docker run -d --name blog-server -p 3000:3000 personal-blog:pr-${{ github.event.pull_request.number }}
+          
+          # Wait for server to be ready
+          echo "Waiting for server to start..."
+          SERVER_READY=false
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              SERVER_READY=true
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+          
+          # Verify server is ready before proceeding
+          if [ "$SERVER_READY" != "true" ]; then
+            echo "Error: Server failed to start within timeout"
+            docker logs blog-server
+            docker stop blog-server || true
+            docker rm blog-server || true
+            exit 1
+          fi
+          
+          # Create screenshots directory
+          mkdir -p screenshots
+          
+          # Take screenshots using Playwright with a large viewport to capture more content (zoomed out effect)
+          # Using 2560x1440 viewport for a zoomed-out view
+          npx playwright screenshot --viewport-size="2560,1440" --full-page http://localhost:3000 screenshots/homepage.png
+          npx playwright screenshot --viewport-size="2560,1440" --full-page http://localhost:3000/blog/homelab-network screenshots/homelab-network.png
+          
+          # Stop the container
+          docker stop blog-server || true
+          docker rm blog-server || true
+
+      - name: Upload screenshots as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-screenshots
+          path: screenshots/
+          retention-days: 30
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Comment with screenshots
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## 📸 PR Screenshots" >> comment.md
+          echo "" >> comment.md
+          echo "Screenshots captured with a zoomed-out viewport (2560x1440 full page)." >> comment.md
+          echo "" >> comment.md
+          echo "### Homepage (/)" >> comment.md
+          echo "" >> comment.md
+          cml asset publish screenshots/homepage.png --md >> comment.md
+          echo "" >> comment.md
+          echo "### Homelab Network (/blog/homelab-network)" >> comment.md
+          echo "" >> comment.md
+          cml asset publish screenshots/homelab-network.png --md >> comment.md
+          echo "" >> comment.md
+          echo "---" >> comment.md
+          echo "> Captured at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> comment.md
+          
+          cml comment create comment.md
