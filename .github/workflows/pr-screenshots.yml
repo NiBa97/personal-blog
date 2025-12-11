@@ -18,13 +18,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
 
       - name: Build application
-        run: yarn build
+        run: npm run build
 
       - name: Install Playwright
         run: npx playwright install chromium
@@ -32,7 +32,7 @@ jobs:
       - name: Start server and take screenshots
         run: |
           # Start the server in the background
-          yarn serve &
+          npm run serve &
           SERVER_PID=$!
           
           # Wait for server to be ready
