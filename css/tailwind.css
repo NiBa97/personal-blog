@@ -108,7 +108,7 @@ input:-webkit-autofill:focus {
 }
 
 .prose code {
-  color: var(--color-indigo-500);
+  color: #6366f1; /* indigo-500 */
 }
 
 .dark .prose-invert a {
@@ -129,5 +129,5 @@ input:-webkit-autofill:focus {
 .dark .prose-invert h4,
 .dark .prose-invert h5,
 .dark .prose-invert h6 {
-  color: var(--color-gray-100);
+  color: #f3f4f6; /* gray-100 */
 }
