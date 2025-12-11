@@ -1,0 +1,89 @@
+name: PR Screenshots
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get latest code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build application
+        run: yarn build
+
+      - name: Install Playwright
+        run: npx playwright install chromium
+
+      - name: Start server and take screenshots
+        run: |
+          # Start the server in the background
+          yarn serve &
+          SERVER_PID=$!
+          
+          # Wait for server to be ready
+          echo "Waiting for server to start..."
+          for i in {1..30}; do
+            if curl -s http://localhost:3000 > /dev/null 2>&1; then
+              echo "Server is ready!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+          
+          # Create screenshots directory
+          mkdir -p screenshots
+          
+          # Take screenshots using Playwright with a large viewport to capture more content (zoomed out effect)
+          # Using 2560x1440 viewport for a zoomed-out view
+          npx playwright screenshot --viewport-size="2560,1440" --full-page http://localhost:3000 screenshots/homepage.png
+          npx playwright screenshot --viewport-size="2560,1440" --full-page http://localhost:3000/blog/homelab-network screenshots/homelab-network.png
+          
+          # Stop the server
+          kill $SERVER_PID || true
+
+      - name: Upload screenshots as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pr-screenshots
+          path: screenshots/
+          retention-days: 30
+
+      - name: Setup CML
+        uses: iterative/setup-cml@v2
+
+      - name: Comment with screenshots
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## 📸 PR Screenshots" >> comment.md
+          echo "" >> comment.md
+          echo "Screenshots captured with a zoomed-out viewport (2560x1440 full page)." >> comment.md
+          echo "" >> comment.md
+          echo "### Homepage (/)" >> comment.md
+          echo "" >> comment.md
+          cml asset publish screenshots/homepage.png --md >> comment.md
+          echo "" >> comment.md
+          echo "### Homelab Network (/blog/homelab-network)" >> comment.md
+          echo "" >> comment.md
+          cml asset publish screenshots/homelab-network.png --md >> comment.md
+          echo "" >> comment.md
+          echo "---" >> comment.md
+          echo "> Captured at: $(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> comment.md
+          
+          cml comment create comment.md
