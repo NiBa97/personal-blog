@@ -1,6 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@source "../node_modules/pliny";
+
+/* Custom theme configuration */
+@theme {
+  /* Extended line heights */
+  --line-height-11: 2.75rem;
+  --line-height-12: 3rem;
+  --line-height-13: 3.25rem;
+  --line-height-14: 3.5rem;
+
+  /* Font family - using CSS variable for Google Font */
+  --font-sans: var(--font-space-grotesk), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+  /* Primary colors - pink palette */
+  --color-primary-50: #fdf2f8;
+  --color-primary-100: #fce7f3;
+  --color-primary-200: #fbcfe8;
+  --color-primary-300: #f9a8d4;
+  --color-primary-400: #f472b6;
+  --color-primary-500: #ec4899;
+  --color-primary-600: #db2777;
+  --color-primary-700: #be185d;
+  --color-primary-800: #9d174d;
+  --color-primary-900: #831843;
+  --color-primary-950: #500724;
+}
+
+/* Dark mode selector */
+@variant dark (&:where(.dark, .dark *));
 
 .task-list-item::before {
   @apply hidden;
@@ -53,4 +82,52 @@ input:-webkit-autofill:focus {
   margin-top: 3px;
   margin-left: 1px;
   margin-right: 2px;
+}
+
+/* Typography plugin customizations */
+.prose a {
+  color: var(--color-primary-500);
+}
+
+.prose a:hover {
+  color: var(--color-primary-600);
+}
+
+.prose a code {
+  color: var(--color-primary-400);
+}
+
+.prose h1,
+.prose h2 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.prose h3 {
+  font-weight: 600;
+}
+
+.prose code {
+  color: var(--color-indigo-500);
+}
+
+.dark .prose-invert a {
+  color: var(--color-primary-500);
+}
+
+.dark .prose-invert a:hover {
+  color: var(--color-primary-400);
+}
+
+.dark .prose-invert a code {
+  color: var(--color-primary-400);
+}
+
+.dark .prose-invert h1,
+.dark .prose-invert h2,
+.dark .prose-invert h3,
+.dark .prose-invert h4,
+.dark .prose-invert h5,
+.dark .prose-invert h6 {
+  color: var(--color-gray-100);
 }
