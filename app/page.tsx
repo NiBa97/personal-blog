@@ -39,23 +39,34 @@ async function getGithubData() {
     let repoData: RepoData | undefined = myCache.get(`${owner}/${repository}`);
 
     if (!repoData) {
-      const repo = gh.getRepo(owner, repository);
-      const [details, contributors] = await Promise.all([repo.getDetails(), repo.getContributors()]);
+      try {
+        const repo = gh.getRepo(owner, repository);
+        const [details, contributors] = await Promise.all([repo.getDetails(), repo.getContributors()]);
 
-      let contributions = 0;
-      contributors.data.forEach((contributor) => {
-        contributions += contributor.contributions;
-      });
+        let contributions = 0;
+        contributors.data.forEach((contributor) => {
+          contributions += contributor.contributions;
+        });
 
-      repoData = {
-        title: repository,
-        stargazersCount: details.data.stargazers_count,
-        totalContributions: contributions,
-        description: details.data.description,
-        url: details.data.html_url,
-      };
-      // Save data to cache
-      myCache.set(`${owner}/${repository}`, repoData);
+        repoData = {
+          title: repository,
+          stargazersCount: details.data.stargazers_count,
+          totalContributions: contributions,
+          description: details.data.description,
+          url: details.data.html_url,
+        };
+        // Save data to cache
+        myCache.set(`${owner}/${repository}`, repoData);
+      } catch {
+        // If GitHub API fails (rate limiting, etc.), use fallback data
+        repoData = {
+          title: repository,
+          stargazersCount: 0,
+          totalContributions: 0,
+          description: `GitHub repository: ${repository}`,
+          url: `https://github.com/${owner}/${repository}`,
+        };
+      }
     }
 
     data[repository] = repoData;
