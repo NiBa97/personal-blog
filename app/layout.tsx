@@ -75,7 +75,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
       <Script
         src="https://rybbit.niklas-bauer.dev/api/script.js"
-        data-site-id="046dc7ef666a"
+        data-site-id="4555ac4fcf1d"
         strategy="afterInteractive"
       />
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
