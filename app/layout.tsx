@@ -3,10 +3,12 @@ import 'pliny/search/algolia.css'
 
 import { Space_Grotesk } from 'next/font/google'
 import Script from 'next/script'
+import { Suspense } from 'react'
 import { SearchProvider, SearchConfig } from 'pliny/search'
 import Header from '@/components/Header'
 import SectionContainer from '@/components/SectionContainer'
 import Footer from '@/components/Footer'
+import RybbitPageview from '@/components/RybbitPageview'
 import siteMetadata from '@/data/siteMetadata'
 import { ThemeProviders } from './theme-providers'
 import { Metadata } from 'next'
@@ -73,12 +75,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <meta name="theme-color" media="(prefers-color-scheme: light)" content="#fff" />
       <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#000" />
       <link rel="alternate" type="application/rss+xml" href="/feed.xml" />
-      <Script
-        src="https://rybbit.niklas-bauer.dev/api/script.js"
-        data-site-id="4555ac4fcf1d"
-        strategy="afterInteractive"
-      />
       <body className="bg-white text-black antialiased dark:bg-gray-950 dark:text-white">
+        <Script
+          src="https://rybbit.niklas-bauer.dev/api/script.js"
+          data-site-id="4555ac4fcf1d"
+          strategy="afterInteractive"
+        />
+        <Suspense fallback={null}>
+          <RybbitPageview />
+        </Suspense>
         <ThemeProviders>
           <SectionContainer>
             <div className="flex flex-col justify-between font-sans">
